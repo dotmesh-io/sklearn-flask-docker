@@ -1,0 +1,60 @@
+kind: pipeline
+name: default
+
+steps:
+- name: docker-publish
+  image: plugins/docker
+  when:
+    event: [ push ]
+  settings:
+    repo: quay.io/dotmesh/sklearn-flask
+    registry: quay.io
+    dockerfile: Dockerfile
+    tags:
+      - ${DRONE_COMMIT_SHA}
+      - ${DRONE_BRANCH}
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+- name: docker-publish-tag
+  image: plugins/docker
+  when:
+    event: [ tag ]
+  settings:
+    repo: quay.io/dotmesh/sklearn-flask
+    registry: quay.io
+    dockerfile: Dockerfile
+    tags:
+      - ${DRONE_TAG}
+      - latest
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+- name: slack
+  image: plugins/slack
+  when:
+    event: [ push ]
+    status: [ success, failure ]
+  depends_on:
+  - docker-publish
+  settings:
+    webhook:
+      from_secret: slack_url
+    channel: ci
+    username: drone
+    icon_url: https://i.pinimg.com/originals/51/29/a4/5129a48ddad9e8408d2757dd10eb836f.jpg
+- name: slack-tag
+  image: plugins/slack
+  when:
+    event: [ tag ]
+    status: [ success, failure ]
+  depends_on:
+  - docker-publish-tag
+  settings:
+    webhook:
+      from_secret: slack_url
+    channel: ci
+    username: drone
+    icon_url: https://i.pinimg.com/originals/51/29/a4/5129a48ddad9e8408d2757dd10eb836f.jpg
