@@ -35,7 +35,7 @@ steps:
 - name: slack
   image: plugins/slack
   when:
-    event: [ push, pull_request ]
+    event: [ push ]
     status: [ success, failure ]
   depends_on:
   - docker-publish
