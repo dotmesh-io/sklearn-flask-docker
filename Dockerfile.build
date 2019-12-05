@@ -4,8 +4,6 @@ ARG model_name
 ENV MODEL_BASE_PATH=/models
 RUN mkdir -p ${MODEL_BASE_PATH}
 
-RUN echo $model_name
-
 ENV MODEL_NAME=$model_name
 ENV MODEL_JOBLIB_FILE=${MODEL_BASE_PATH}/${MODEL_NAME}
 # Copying the model
