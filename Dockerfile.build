@@ -1,4 +1,4 @@
-FROM quay.io/dotmesh/sklearn-flask:1.0.2-python3.7
+FROM quay.io/dotmesh/sklearn-flask:1.1.0-python3.7
 ARG model_name
 # Set where models should be stored in the container
 ENV MODEL_BASE_PATH=/models
