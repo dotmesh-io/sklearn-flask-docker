@@ -1,4 +1,4 @@
-FROM quay.io/dotmesh/sklearn-flask:1.0.2-python3.7
+FROM quay.io/dotmesh/sklearn-flask:1.1.1-python3.7
 ARG model_name
 # Set where models should be stored in the container
 ENV MODEL_BASE_PATH=/models
@@ -6,9 +6,7 @@ RUN mkdir -p ${MODEL_BASE_PATH}
 
 RUN echo $model_name
 
-# The only required piece is the model name in order to differentiate endpoints
 ENV MODEL_NAME=$model_name
-ENV MODEL_ABS_PATH=${MODEL_BASE_PATH}/${MODEL_NAME}
-
+ENV MODEL_JOBLIB_FILE=${MODEL_BASE_PATH}/${MODEL_NAME}
 # Copying the model
 COPY ./${MODEL_NAME} ${MODEL_BASE_PATH}/${MODEL_NAME}
