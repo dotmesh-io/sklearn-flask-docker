@@ -16,3 +16,40 @@ For a tutorial on how to label up model files for use with this image, see [dots
 
 ## Updating the docker image (dotscience maintainers)
 This docker image is deployed to `quay.io/dotmesh/sklearn-flask` on every push. To update this docker image just submit a PR. To release it, use github releases and create a new tag, then update the base image tag [here](https://github.com/dotmesh-io/dotscience-agent/blob/master/dockerfiles/sklearn/Dockerfile#L1)
+
+
+## Development and Testing
+
+There's a test model in `/test_data/model.joblib`.
+
+1. Create virtual env: 
+  
+  ```
+  python3 -m venv venv
+  ```
+
+
+2. Activate it:
+
+  ```
+  source venv/bin/activate
+  ```
+
+3. Start server:
+
+  ```
+  python main.py
+  ```
+
+4. Call model "predict" endpoint:
+  ```
+  curl --request POST \
+    --url http://localhost:8501/predict \
+    --header 'content-type: application/json' \
+    --data '{
+    "instances": [
+      [6.8,  2.8,  4.8,  1.4],
+      [6.0,  3.4,  4.5,  1.6]
+    ]
+  }'
+```
