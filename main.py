@@ -13,6 +13,10 @@ model = None
 def healthcheck():
     return 'true'
 
+@app.route('/', methods=['GET'])
+def base():
+    return 'OK'
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json(force=True)
