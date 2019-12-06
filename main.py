@@ -43,7 +43,7 @@ if __name__ == '__main__':
         print('model loaded')
 
     except Exception as e:
-        print('No model here')
+        print('No model here: %s' % os.environ.get("MODEL_JOBLIB_FILE"))
         print('Train first')
         print(str(e))
         sys.exit()
