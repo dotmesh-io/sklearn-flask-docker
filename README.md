@@ -1,4 +1,7 @@
 # sklearn-flask-docker
+
+[![Build Status](https://drone.app.cloud.dotscience.net/api/badges/dotmesh-io/sklearn-flask-docker/status.svg)](https://drone.app.cloud.dotscience.net/dotmesh-io/sklearn-flask-docker)
+
 This is a minimal docker image which just contains flask and joblib. Its purpose is to provide a base image from which you can deploy sklearn models which can then be exposed as a http API.
 
 ## Using this docker image
