@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     try:
         model = load(os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
-        print('model loaded')
+        print(' * Model loaded from "%s"' % os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
 
     except Exception as e:
         print('No model here: %s' % os.environ.get("MODEL_JOBLIB_FILE"))
