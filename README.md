@@ -44,7 +44,7 @@ There's a test model in `/test_data/model.joblib`.
 4. Call model "predict" endpoint:
   ```
   curl --request POST \
-    --url http://localhost:8501/predict \
+    --url http://localhost:8501/v1/models/model:predict \
     --header 'content-type: application/json' \
     --data '{
     "instances": [
