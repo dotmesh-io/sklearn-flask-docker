@@ -9,15 +9,29 @@ app = Flask(__name__)
 
 model = None
 
-@app.route('/healthcheck')
+@app.route('/v1/healthcheck')
 def healthcheck():
-    return 'true'
-
-@app.route('/', methods=['GET'])
-def base():
     return 'OK'
 
-@app.route('/predict', methods=['POST'])
+# TF Serving here returns a bigger response with available models
+# {
+#   "model_version_status": [
+#     {
+#       "version": "1",
+#       "state": "AVAILABLE",
+#       "status": {
+#         "error_code": "OK",
+#         "error_message": ""
+#       }
+#     }
+#   ]
+# }
+# We might want to return something similar
+@app.route('/v1/models/model', methods=['GET'])
+def models():
+    return 'AVAILABLE'
+
+@app.route('/v1/models/model:predict', methods=['POST'])
 def predict():
     data = request.get_json(force=True)
 
