@@ -61,8 +61,7 @@ if __name__ == '__main__':
         print(' * Model loaded from "%s"' % os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
 
     except Exception as e:
-        print('No model here: %s' % os.environ.get("MODEL_JOBLIB_FILE"))
-        print('Train first')
+        print('Error running the model')
         print(str(e))
         sys.exit()
 
