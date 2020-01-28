@@ -1,7 +1,7 @@
 from sklearn import svm
 from sklearn import datasets
 from joblib import dump
-clf = svm.SVC(gamma='scale')
+clf = svm.SVC(gamma='scale', probability=True)
 iris = datasets.load_iris()
 X, y = iris.data, iris.target
 clf.fit(X, y)

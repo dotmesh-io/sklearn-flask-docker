@@ -44,7 +44,7 @@ def predict():
         raise Exception(
             "Failed to initialize NumPy array from inputs: %s, %s" % (e, instances))
     try:
-        result = model.predict(inputs).tolist()
+        result = model.predict_proba(inputs).tolist()
         return { "predictions" : result }
     except Exception as e:
             raise Exception("Failed to predict %s" % e)
