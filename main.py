@@ -56,13 +56,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         os.environ.setdefault("MODEL_JOBLIB_FILE", sys.argv[1])
 
-    try:
-        model = load(os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
-        print(' * Model loaded from "%s"' % os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
-
-    except Exception as e:
-        print('Error running the model')
-        print(str(e))
-        sys.exit()
+    model = load(os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
+    print(' * Model loaded from "%s"' % os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
 
     app.run(host=host, port=port)
