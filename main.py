@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-from joblib import load
+import joblib
+import pickle
 import numpy as np
 import os
 import http
@@ -56,7 +57,14 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         os.environ.setdefault("MODEL_JOBLIB_FILE", sys.argv[1])
 
-    model = load(os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
-    print(' * Model loaded from "%s"' % os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib"))
+    path = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
+    try:
+        # Backwards compatibility, new code shouldn't use joblib:
+        model = joblib.load(path)
+    except:
+        print("Failed to open with joblib, using regular pickle instead.")
+        with open(path, "rb") as f:
+            model = pickle.load(f)
+    print(' * Model loaded from "%s"' % (path,))
 
     app.run(host=host, port=port)
