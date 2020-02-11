@@ -5,6 +5,7 @@ import numpy as np
 import os
 import http
 import sys
+import tarfile
 
 app = Flask(__name__)
 
@@ -50,6 +51,24 @@ def predict():
     except Exception as e:
             raise Exception("Failed to predict %s" % e)
 
+
+def maybe_untar(path):
+    """Sometimes the model is actually a tarball with the model inside.
+
+    Yes, this is terrible.
+    """
+    try:
+        t = tarfile.open(path)
+    except Exception as e:
+        print("Not a tarfile: {} {}".format(e.__class__, e))
+        return
+    base = os.path.basename(path)
+    infile = t.extractfile(os.path.join(base, base))
+    with open(path + ".tmp", "wb") as outfile:
+        outfile.write(infile.read())
+    os.rename(path + ".tmp", path)
+
+
 if __name__ == '__main__':
     host = os.environ.get("FLASK_HOST", "0.0.0.0")
     port = os.environ.get("FLASK_PORT", "8501")
@@ -58,6 +77,7 @@ if __name__ == '__main__':
         os.environ.setdefault("MODEL_JOBLIB_FILE", sys.argv[1])
 
     path = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
+    maybe_untar(path)
     try:
         # Backwards compatibility, new code shouldn't use joblib:
         model = joblib.load(path)
