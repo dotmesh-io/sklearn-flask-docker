@@ -6,5 +6,5 @@ RUN mkdir -p ${MODEL_BASE_PATH}
 
 ENV MODEL_NAME=$model_name
 ENV MODEL_JOBLIB_FILE=${MODEL_BASE_PATH}/${MODEL_NAME}
-# Copying the model
+# Copying the model; it might be a tarball of files:
 COPY ./${MODEL_NAME} ${MODEL_BASE_PATH}/${MODEL_NAME}

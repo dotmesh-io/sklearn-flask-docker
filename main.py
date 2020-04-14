@@ -69,7 +69,8 @@ def maybe_untar(path):
     os.rename(path + ".tmp", path)
 
 
-if __name__ == '__main__':
+def setup():
+    """Setup the model object."""
     host = os.environ.get("FLASK_HOST", "0.0.0.0")
     port = os.environ.get("FLASK_PORT", "8501")
     # if we haven't overriden the model filename using env var at runtime, use the args passed in
@@ -78,6 +79,8 @@ if __name__ == '__main__':
 
     path = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
     maybe_untar(path)
+
+    global model
     try:
         # Backwards compatibility, new code shouldn't use joblib:
         model = joblib.load(path)
@@ -87,4 +90,7 @@ if __name__ == '__main__':
             model = pickle.load(f)
     print(' * Model loaded from "%s"' % (path,))
 
+
+if __name__ == '__main__':
+    setup()
     app.run(host=host, port=port)
