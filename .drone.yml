@@ -3,6 +3,12 @@ type: docker
 name: default
 
 steps:
+- name: unittest
+  image: python:3.8-slim-buster
+  commands:
+    - pip install -r requirements.txt
+    - pip install pytest
+    - py.test
 - name: docker-publish
   image: plugins/docker
   when:

@@ -6,14 +6,18 @@ import os
 import http
 import sys
 import tarfile
+import tempfile
+from subprocess import check_call
 
 app = Flask(__name__)
 
 model = None
 
-@app.route('/v1/healthcheck')
+
+@app.route("/v1/healthcheck")
 def healthcheck():
-    return 'OK'
+    return "OK"
+
 
 # TF Serving here returns a bigger response with available models
 # {
@@ -29,27 +33,40 @@ def healthcheck():
 #   ]
 # }
 # We might want to return something similar
-@app.route('/v1/models/model', methods=['GET'])
+@app.route("/v1/models/model", methods=["GET"])
 def models():
-    return 'AVAILABLE'
+    return "AVAILABLE"
 
-@app.route('/v1/models/model:predict', methods=['POST'])
-def predict():
-    data = request.get_json(force=True)
 
-    print(data)
+def predict(model, query):
+    """Default implementation of model prediction.
 
-    instances = data["instances"]
+    May be overriden by custom_predict.py if it exists.
+
+    Accepts the unpickled model and a decoded-from-JSON query, must return a
+    response that can be encoded as JSON.
+    """
+    instances = query["instances"]
     try:
         inputs = np.array(instances)
     except Exception as e:
         raise Exception(
-            "Failed to initialize NumPy array from inputs: %s, %s" % (e, instances))
+            "Failed to initialize NumPy array from inputs: %s, %s" % (e, instances)
+        )
+    result = model.predict_proba(inputs).tolist()
+    return {"predictions": result}
+
+
+@app.route("/v1/models/model:predict", methods=["POST"])
+def http_predict():
+    data = request.get_json(force=True)
+
+    print(data)
+
     try:
-        result = model.predict_proba(inputs).tolist()
-        return { "predictions" : result }
+        return predict(model, data)
     except Exception as e:
-            raise Exception("Failed to predict %s" % e)
+        raise Exception("Failed to predict %s" % e)
 
 
 def maybe_untar(path):
@@ -63,13 +80,39 @@ def maybe_untar(path):
         print("Not a tarfile: {} {}".format(e.__class__, e))
         return
     base = os.path.basename(path)
+
+    # Extract custom_predict.py if it exists:
+    try:
+        infile = t.extractfile(os.path.join(base, "custom_predict.py"))
+    except KeyError:
+        pass
+    else:
+        # Override the prediction function:
+        global predict
+        custom_predict = {}
+        exec(infile.read(), custom_predict, custom_predict)
+        predict = custom_predict["predict"]
+
+    # Extract runtime-requirements.txt if it exists:
+    try:
+        infile = t.extractfile(os.path.join(base, "runtime-requirements.txt"))
+    except KeyError:
+        pass
+    else:
+        with tempfile.NamedTemporaryFile("wb") as f:
+            f.write(infile.read())
+            f.flush()
+            check_call(["pip", "install", "-r", f.name])
+
+    # Extract the model object:
     infile = t.extractfile(os.path.join(base, base))
     with open(path + ".tmp", "wb") as outfile:
         outfile.write(infile.read())
     os.rename(path + ".tmp", path)
 
 
-if __name__ == '__main__':
+def setup():
+    """Setup the model object."""
     host = os.environ.get("FLASK_HOST", "0.0.0.0")
     port = os.environ.get("FLASK_PORT", "8501")
     # if we haven't overriden the model filename using env var at runtime, use the args passed in
@@ -78,6 +121,8 @@ if __name__ == '__main__':
 
     path = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
     maybe_untar(path)
+
+    global model
     try:
         # Backwards compatibility, new code shouldn't use joblib:
         model = joblib.load(path)
@@ -87,4 +132,7 @@ if __name__ == '__main__':
             model = pickle.load(f)
     print(' * Model loaded from "%s"' % (path,))
 
+
+if __name__ == "__main__":
+    setup()
     app.run(host=host, port=port)
