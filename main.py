@@ -113,8 +113,6 @@ def maybe_untar(path):
 
 def setup():
     """Setup the model object."""
-    host = os.environ.get("FLASK_HOST", "0.0.0.0")
-    port = os.environ.get("FLASK_PORT", "8501")
     # if we haven't overriden the model filename using env var at runtime, use the args passed in
     if len(sys.argv) > 1:
         os.environ.setdefault("MODEL_JOBLIB_FILE", sys.argv[1])
@@ -135,4 +133,6 @@ def setup():
 
 if __name__ == "__main__":
     setup()
+    host = os.environ.get("FLASK_HOST", "0.0.0.0")
+    port = os.environ.get("FLASK_PORT", "8501")
     app.run(host=host, port=port)
