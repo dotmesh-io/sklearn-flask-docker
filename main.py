@@ -81,6 +81,17 @@ def maybe_untar(path):
         return
     base = os.path.basename(path)
 
+    # Extract runtime-requirements.txt if it exists:
+    try:
+        infile = t.extractfile(os.path.join(base, "runtime-requirements.txt"))
+    except KeyError:
+        pass
+    else:
+        with tempfile.NamedTemporaryFile("wb") as f:
+            f.write(infile.read())
+            f.flush()
+            check_call(["pip", "install", "-r", f.name])
+
     # Extract custom_predict.py if it exists:
     try:
         infile = t.extractfile(os.path.join(base, "custom_predict.py"))
@@ -92,17 +103,6 @@ def maybe_untar(path):
         custom_predict = {}
         exec(infile.read(), custom_predict, custom_predict)
         predict = custom_predict["predict"]
-
-    # Extract runtime-requirements.txt if it exists:
-    try:
-        infile = t.extractfile(os.path.join(base, "runtime-requirements.txt"))
-    except KeyError:
-        pass
-    else:
-        with tempfile.NamedTemporaryFile("wb") as f:
-            f.write(infile.read())
-            f.flush()
-            check_call(["pip", "install", "-r", f.name])
 
     # Extract the model object:
     infile = t.extractfile(os.path.join(base, base))

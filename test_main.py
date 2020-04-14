@@ -65,12 +65,13 @@ def test_custom_predict_from_tarball(client):
     with tempfile.NamedTemporaryFile("w") as f:
         f.write(
             """\
+# make sure we can import custom library
+import cowsay
+
 def predict(model, query):
     import main
     # make sure we got the model passed in:
     assert model == main.model
-    # make sure we can import custom library
-    import cowsay
     return {"hello": sum(query["instances"][0])}
 """
         )
