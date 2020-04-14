@@ -64,7 +64,7 @@ def http_predict():
     print(data)
 
     try:
-        return predict(model, data)
+        return jsonify(predict(model, data))
     except Exception as e:
         raise Exception("Failed to predict %s" % e)
 

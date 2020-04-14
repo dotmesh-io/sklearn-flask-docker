@@ -72,7 +72,7 @@ def predict(model, query):
     import main
     # make sure we got the model passed in:
     assert model == main.model
-    return {"hello": sum(query["instances"][0])}
+    return [sum(query["instances"][0]), {"hello": 123}]
 """
         )
         f.flush()
@@ -87,4 +87,4 @@ def predict(model, query):
 
     main.setup()
     result = client.post("/v1/models/model:predict", json={"instances": [[1, 2, 3, 4]]})
-    assert result.json == {"hello": 10}
+    assert result.json == [10, {"hello": 123}]
