@@ -60,14 +60,20 @@ def test_custom_predict_from_tarball(client):
     """
     Custom prediction logic.
     """
+    with tempfile.NamedTemporaryFile("w", delete=False) as requirements_f:
+        requirements_f.write("cowsay")
     with tempfile.NamedTemporaryFile("w") as f:
-        f.write("""\
+        f.write(
+            """\
 def predict(model, query):
     import main
     # make sure we got the model passed in:
     assert model == main.model
+    # make sure we can import custom library
+    import cowsay
     return {"hello": sum(query["instances"][0])}
-""")
+"""
+        )
         f.flush()
         tf = tarfile.open("mymodel", "w")
         tf.add(
@@ -75,6 +81,7 @@ def predict(model, query):
             arcname="mymodel/mymodel",
         )
         tf.add(f.name, arcname="mymodel/custom_predict.py")
+        tf.add(requirements_f.name, arcname="mymodel/runtime-requirements.txt")
         tf.close()
 
     main.setup()

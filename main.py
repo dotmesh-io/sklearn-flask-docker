@@ -6,6 +6,8 @@ import os
 import http
 import sys
 import tarfile
+import tempfile
+from subprocess import check_call
 
 app = Flask(__name__)
 
@@ -90,6 +92,17 @@ def maybe_untar(path):
         custom_predict = {}
         exec(infile.read(), custom_predict, custom_predict)
         predict = custom_predict["predict"]
+
+    # Extract runtime-requirements.txt if it exists:
+    try:
+        infile = t.extractfile(os.path.join(base, "runtime-requirements.txt"))
+    except KeyError:
+        pass
+    else:
+        with tempfile.NamedTemporaryFile("wb") as f:
+            f.write(infile.read())
+            f.flush()
+            check_call(["pip", "install", "-r", f.name])
 
     # Extract the model object:
     infile = t.extractfile(os.path.join(base, base))
