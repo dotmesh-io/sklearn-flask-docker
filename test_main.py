@@ -54,3 +54,29 @@ def test_default_predict_from_tarball(client):
     assert result.json["predictions"] == [
         [pytest.approx(0.26, 0.1), pytest.approx(0.23, 0.1), pytest.approx(0.51, 0.1)]
     ]
+
+
+def test_custom_predict_from_tarball(client):
+    """
+    Custom prediction logic.
+    """
+    with tempfile.NamedTemporaryFile("w") as f:
+        f.write("""\
+def predict(model, query):
+    import main
+    # make sure we got the model passed in:
+    assert model == main.model
+    return {"hello": sum(query["instances"][0])}
+""")
+        f.flush()
+        tf = tarfile.open("mymodel", "w")
+        tf.add(
+            os.path.join(ORIGINAL_DIR, "example_model", "model.joblib"),
+            arcname="mymodel/mymodel",
+        )
+        tf.add(f.name, arcname="mymodel/custom_predict.py")
+        tf.close()
+
+    main.setup()
+    result = client.post("/v1/models/model:predict", json={"instances": [[1, 2, 3, 4]]})
+    assert result.json == {"hello": 10}
