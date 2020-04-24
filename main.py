@@ -69,21 +69,20 @@ def http_predict():
         raise Exception("Failed to predict %s" % e)
 
 
-def maybe_untar(path):
+def maybe_untar(tarFileBaseDir, joblibFilePath):
     """Sometimes the model is actually a tarball with the model inside.
 
     Yes, this is terrible.
     """
     try:
-        t = tarfile.open(path)
+        t = tarfile.open(tarFileBaseDir)
     except Exception as e:
         print("Not a tarfile: {} {}".format(e.__class__, e))
         return
-    base = os.path.basename(path)
 
     # Extract runtime-requirements.txt if it exists:
     try:
-        infile = t.extractfile(os.path.join(base, "runtime-requirements.txt"))
+        infile = t.extractfile(os.path.join(tarFileBaseDir, "runtime-requirements.txt"))
     except KeyError:
         pass
     else:
@@ -94,7 +93,7 @@ def maybe_untar(path):
 
     # Extract custom_predict.py if it exists:
     try:
-        infile = t.extractfile(os.path.join(base, "custom_predict.py"))
+        infile = t.extractfile(os.path.join(tarFileBaseDir, "custom_predict.py"))
     except KeyError:
         pass
     else:
@@ -105,10 +104,11 @@ def maybe_untar(path):
         predict = custom_predict["predict"]
 
     # Extract the model object:
-    infile = t.extractfile(os.path.join(base, base))
-    with open(path + ".tmp", "wb") as outfile:
+    print(t.list())
+    infile = t.extractfile(os.path.join(tarFileBaseDir, joblibFilePath))
+    with open(joblibFilePath + ".tmp", "wb") as outfile:
         outfile.write(infile.read())
-    os.rename(path + ".tmp", path)
+    os.rename(joblibFilePath + ".tmp", joblibFilePath)
 
 
 def setup():
@@ -117,18 +117,23 @@ def setup():
     if len(sys.argv) > 1:
         os.environ.setdefault("MODEL_JOBLIB_FILE", sys.argv[1])
 
-    path = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
-    maybe_untar(path)
+    tarFileBaseDir = "model"
+    joblibFilePath = os.environ.get("MODEL_JOBLIB_FILE", "example_model/model.joblib")
+    maybe_untar(tarFileBaseDir, joblibFilePath)
 
     global model
     try:
         # Backwards compatibility, new code shouldn't use joblib:
-        model = joblib.load(path)
-    except:
-        print("Failed to open with joblib, using regular pickle instead.")
-        with open(path, "rb") as f:
+        model = joblib.load(joblibFilePath)
+    except Exception as e:
+        print(e)
+        print(
+            "Failed to open with joblib %s, using regular pickle instead."
+            % joblibFilePath
+        )
+        with open(joblibFilePath, "rb") as f:
             model = pickle.load(f)
-    print(' * Model loaded from "%s"' % (path,))
+    print(' * Model loaded from "%s"' % (joblibFilePath,))
 
 
 if __name__ == "__main__":
