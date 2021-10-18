@@ -4,7 +4,7 @@ name: default
 
 steps:
 - name: unittest
-  image: python:3.8-slim-buster
+  image: python:3.10-slim-buster
   commands:
     - pip install -r requirements.txt
     - pip install pytest
